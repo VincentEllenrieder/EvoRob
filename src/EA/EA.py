@@ -29,7 +29,7 @@ class EA(object):
 
         # % bookkeeping
         self.directory_name = output_dir
-        self.full_x = []
+        self.full_x = ['test']
         self.full_fitness = []
         self.x_best_so_far = None
         self.f_best_so_far = -np.inf
