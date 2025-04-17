@@ -34,7 +34,7 @@ class ES:
         self.max = opts["max"]
 
         self.current_gen = 0
-        self.current_mean = self.initialise_x0()  #TODO
+        self.current_mean = np.mean(self.initialise_x0())  #TODO
         self.current_sigma = opts["mutation_sigma"]
         self.sigma_limit = opts["sigma_limit"]
 
@@ -86,45 +86,50 @@ class ES:
 
     def initialise_x0(self,):
         #TODO
-        mean_vector = ...
-        return mean_vector
+        pop_x0 = np.random.uniform(low=ES_opts.get("min"), high=ES_opts.get("max"), size=(self.n_pop, self.n_params)) # need to return a population of size n_pop y n_params
+        return pop_x0
 
     def generate_mutated_offspring(self, population_size):
         # TODO
-        population = ...
-
         # Compute multivariate Gaussian noise
-        mutation = ...
+        mutation = np.random.normal(loc=0.0, scale=1.0, size=(population_size, self.n_params))
 
         # Compute offspring
-        mutated_population = ...
+        mutated_population = self.current_mean + self.current_sigma * mutation
 
         return mutated_population
 
     def sort_and_select_parents(self, population, fitness, num_parents):
         # TODO
-        parent_population = ...
-        parent_fitness = ...
+        sorted_indices = np.argsort(fitness)[::-1]
+        sorted_indices = sorted_indices[0:num_parents]
+
+        parent_population = population[sorted_indices]
+        parent_fitness = fitness[sorted_indices]
+
         return parent_population, parent_fitness
 
     def update_population_mean(self, parent_population, parent_fitness):
         # TODO
         # Normalise parent fitness scores
-        normed_parents_fitness = ...
+        normed_parents_fitness = parent_fitness / np.sum(parent_fitness)
 
         # Compute population weighted to the normed fitness scores
-        weighted_parents_population = ...
+        weight = np.outer(normed_parents_fitness, np.ones((1, parent_population.shape[1])))
+        weighted_parents_population = np.multiply(parent_population, weight) 
 
         # Calculate the sum of weighted parents population
-        updated_mean_vector = ...
+        updated_mean_vector = np.sum(weighted_parents_population, axis=0)
 
         return updated_mean_vector
 
     def update_sigma(self):
         #TODO
-        minimum_sigma = ...
+        minimum_sigma = self.sigma_limit
         sigma = self.current_sigma
-        param_size = self.n_params
+
+        sigma = 0.2 * np.exp(-self.n_gen) + minimum_sigma
+
         return sigma
 
     def save_checkpoint(self):
